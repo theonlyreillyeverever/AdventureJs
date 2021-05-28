@@ -93,6 +93,9 @@ export class Player{
         }
 
         IsInRangeItem(toggle : boolean, item: GameObjects){
+                // if(item === this.itemtmp && toggle === this.inRange){
+                //         return;
+                // }
                 this.inRange = toggle;
                 this.itemtmp = item
         }
@@ -300,9 +303,10 @@ export class Player{
     }
 
     CollectWeapon(weapon : Weapon){
-        if(this.Position().x === weapon.Position().x && this.Position().y === weapon.Position().y){
+        if(!weapon.Collected() && this.Position().x === weapon.Position().x && this.Position().y === weapon.Position().y){
                 this.SetCurrentWeapon(weapon);
                 weapon.SetCollected(true);
+                alert(weapon.Name() + " Collected" + weapon.Collected()   )
 
                 }
         }

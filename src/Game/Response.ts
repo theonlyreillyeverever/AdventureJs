@@ -1,6 +1,5 @@
 
 import {GameObjetsAbstract} from "../Levels/WallObejctsAbstract"
-import { Person } from "../Types/Person"
 
 
 export class TriggedEvent<T>{

@@ -1,4 +1,3 @@
-import { createThis } from "typescript";
 import { Clock } from "./Clock";
 import {grassJpg, grassDark} from "../Assets/grass"
 

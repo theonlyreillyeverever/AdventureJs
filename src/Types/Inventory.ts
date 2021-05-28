@@ -1,6 +1,9 @@
 import { Key } from "readline";
 import { GameObjectType } from "./GameObjectTypes";
+import { Seed } from "./Items/Farming/Seed";
 import {Item} from "./Items/Item"
+import { NullObject } from "./Items/NullObject";
+import { Bucket } from "./Items/Tools/Bucket";
 import { GameObjects } from "./Objects";
 import { WeaponUpgrade } from "./WeaponUpgrade";
 
@@ -145,6 +148,7 @@ export class InventoryObjects {
     protected inventorySize : number;
     protected selectedItemIndex : number
     protected hasKey : Key | undefined
+    protected selectedItem : GameObjects
     
 
     constructor(inventorySize : number){
@@ -152,7 +156,17 @@ export class InventoryObjects {
         this.inventorySize = inventorySize
         this.selectedItemIndex = 0
         this.hasKey = undefined
+        this.selectedItem = new NullObject()
 
+    }
+
+
+    SetSelectedItem(item : GameObjects){
+        this.selectedItem = item
+    }
+
+    SelectedItem() : GameObjects{
+        return this.selectedItem
     }
 
     HasKey() : Key | undefined
@@ -167,14 +181,16 @@ export class InventoryObjects {
         this.hasKey = key;
     }
 
-    SearchByName(name : string) : boolean{
+
+
+    SearchByName(name : string) : number{
             for(let i = 0;i< this.Inventory.length; i++){
                 if(this.Inventory[i].Name() === name){
-                    return true;
+                    return i;
                 }
             }
 
-            return false
+            return -1
     }
     
 
@@ -204,7 +220,7 @@ export class InventoryObjects {
         return this.Inventory;
     }
 
-    AddItem(newItem : GameObjects){
+    AddItem(newItem : GameObjects | Bucket | Seed){
         if(this.Inventory.length >= this.GetInventoryMaxSize()){
             console.log("Inventory is full, drop an item")
             return;

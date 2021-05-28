@@ -1,28 +1,14 @@
 import {Level} from "./Level"
-import {Room} from "../Types/Room"
 import {Doorway} from "./Doorway"
-import {Food} from "../Types/Food"
-import {Weapon} from "../Types/Weapon"
+
 import {Layout } from "../Types/Layout"
-import {ItemFactory} from "../Types/ItemFactory"
-import {EnemyFactory} from "../Types/EnemyFactory"
-import { Enemy } from "../Types/Enemy"
-import {grassJpg, grassDark} from "../Assets/grass"
-import {HouseFloor} from "../Assets/HouseFloor"
-import { Villager } from "../Types/Villager"
-import Demon from "../Assets/dog-demon.png"
-import { House } from "../Types/House"
-import { Key } from "../Types/Key"
-import {DayNight} from "../Game/DayNight"
-import { Swith } from "../Types/Swith"
-import { Tree } from "../Types/Tree"
-import { MovingObejct } from "./MovingObject"
+
+import {grassDark} from "../Assets/grass"
+
 import { Stage } from "./Leveltmp"
-import { GameObjectType } from "../Types/GameObjectTypes"
 import { GameObjects } from "../Types/Objects"
 import { GameObjetsAbstract } from "./WallObejctsAbstract"
 import { HouseTree } from "../LevelNodes/LevelNode"
-import { Item } from "../Types/Items/Item"
 import { Player } from "../Types/Player"
 
 
@@ -144,7 +130,7 @@ export class BuildLevel {
         [1,1,1,1,1.1,1,1],
         [1,0,3,0,0,2,0,1],
         [1,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,7,1],
         [2,0,0,0,0,-1,0,1],
         [1,0,0,0,0,0,0,1],
         [1,6,6,6,6,6,6,1],
@@ -423,11 +409,18 @@ export class BuildLevel {
             ],  {x : 200, y :60})
 
 
+        const HOUSETWO = new Stage(2, "beta", second.BuildWalls(), [], grassDark, [
+            new Doorway(0, 0, 0, true, "leave", {x : 400, y: 0}, false)
+        ],  {x : 200, y :60})
+
+
+
+
          
 
 
 
-        const Lvl = new Level(1, "leveltwo", "roo", [betaStage, betaStagetwo])
+        const Lvl = new Level(1, "leveltwo", "roo", [betaStage, betaStagetwo, HOUSETWO])
         return Lvl;
     }
 

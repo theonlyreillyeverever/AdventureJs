@@ -1,13 +1,12 @@
 import { Enemy } from "./Enemy";
-import { Entity } from "./Entity"
 import { Item } from "./Items/Item";
 import { GameObjects } from "./Objects"
-import { Person } from "./Person";
 import { Player } from "./Player"
 
 
 
 export class Area {
+
 
 
     
@@ -20,6 +19,7 @@ export class Area {
          if((player.Position().x >= object.Position().x-distance && player.Position().x <= object.Position().x+object.Dimensions().width+distance)
          && (player.Position().y >= object.Position().y-distance && player.Position().y <= object.Position().y+object.Dimensions().height+distance)){
             //object.SetWithinRange(true)
+
             return true
         }
         else if((player.Position().x >= object.Position().x && player.Position().x <= object.Position().x+object.Dimensions().width+distance)

@@ -1,8 +1,6 @@
-import { itemState } from "./Items/Item";
 import {MoveState} from "./MoveState"
 import { OBJECTSTATE } from "./Objects";
 import {Player} from "./Player"
-import { Swith } from "./Swith";
 
 export enum ControllerState {
         MOVEMENT,
@@ -70,7 +68,7 @@ export class Controller{
 
                     if(this.PlayerController.InRange()){
                         if(key === 32){
-                            console.log(this.PlayerController.CanCross())
+                            //console.log(this.PlayerController.CanCross())
                             console.log(this.PlayerController.DoAction())
                             if(this.PlayerController.DoAction()?.DoAction())
                             {
@@ -82,12 +80,13 @@ export class Controller{
                         }
         
                         if(this.PlayerController.DoAction()?.DoAction()){
-        
+                            
                         }
                     }
-                    console.log(this.PlayerController.InRange())
+                  //  console.log(this.PlayerController.InRange())
 
 
+                    //eNTER KEY
                     if(key === 32){
                         this.PlayerController.SetPlayerAttack(true)
                         this.hitSound.play()
@@ -116,8 +115,8 @@ export class Controller{
                     if(this.PlayerController.InRange() && this.PlayerController.CurrentItemInRange().Name() !== ""){
                         if(key === 49){
                   
-                            console.log(this.PlayerController.CanCross())
-                            console.log(this.PlayerController.DoAction())
+                            //console.log(this.PlayerController.CanCross())
+                            //console.log(this.PlayerController.DoAction())
                             if(this.PlayerController.DoAction()?.DoAction())
                             {
                                 this.PlayerController.DoAction()?.SetDoAction(false)
@@ -219,73 +218,75 @@ export class Controller{
 
 
 
-            if(this.PlayerController.Speak()){
-                if(key === 13){
-                    switch (this.PlayerController.ViewMessage()) {
-                        case true:
-                            this.PlayerController.SetViewMessage(false)
-                            break;
-                        case false:
-                            this.PlayerController.SetViewMessage(true)
-                            break
-                    }
-                }
-            }
+            // if(this.PlayerController.Speak()){
+            //     if(key === 13){
+            //         switch (this.PlayerController.ViewMessage()) {
+            //             case true:
+            //                 this.PlayerController.SetViewMessage(false)
+            //                 break;
+            //             case false:
+            //                 this.PlayerController.SetViewMessage(true)
+            //                 break
+            //         }
+            //     }
+            // }
 
 
-              if(!this.PlayerController.ViewInventory() && !this.PlayerController.ViewMessage()){
+            //   if(!this.PlayerController.ViewInventory() && !this.PlayerController.ViewMessage()){
 
 
-                if(key === 67){
-                    this.PlayerController.SetShooting(true)
-                    this.PlayerController.AddBullet();
-                }
+            //     if(key === 67){
+            //         this.PlayerController.SetShooting(true)
+            //         this.PlayerController.AddBullet();
+            //     }
 
-                if(key === 49){
+            //     if(key === 49){
 
-                }
+            //     }
 
-                if(key === 50){
+            //     if(key === 50){
 
-                }
+            //     }
 
-            }
-            if(this.PlayerController.ViewInventory()){
+            // }
+            // if(this.PlayerController.ViewInventory()){
 
-                }
+            //     }
 
-                if(this.PlayerController.PlaceObject().PlaceObject()){
-                    this.PlayerController.PlaceObject().SelectArea(key, this.PlayerController)
+            //     if(this.PlayerController.PlaceObject().PlaceObject()){
+            //         this.PlayerController.PlaceObject().SelectArea(key, this.PlayerController)
     
-                    if(key === 32){
-                        //this.PlayerController.Inventory().GetInventory()[this.PlayerController.Inventory().SelectedItemIndex()].Use(this.PlayerController)
-                        this.PlayerController.Inventory().DropItemByIndex(this.PlayerController.Inventory().SelectedItemIndex())
-                        this.PlayerController.Inventory().SetSelectItemindex(this.PlayerController.Inventory().SelectedItemIndex()-1)
-                        this.PlayerController.PlaceObject().Item().UpdateState(OBJECTSTATE.READY)
-                        this.PlayerController.PlaceObject().SetPlaceObject(false)
-                        this.StateSwith(ControllerState.MOVEMENT)
+            //         if(key === 32){
+            //             //this.PlayerController.Inventory().GetInventory()[this.PlayerController.Inventory().SelectedItemIndex()].Use(this.PlayerController)
+            //             this.PlayerController.Inventory().DropItemByIndex(this.PlayerController.Inventory().SelectedItemIndex())
+            //             this.PlayerController.Inventory().SetSelectItemindex(this.PlayerController.Inventory().SelectedItemIndex()-1)
+            //             this.PlayerController.PlaceObject().Item().UpdateState(OBJECTSTATE.READY)
+            //             this.PlayerController.PlaceObject().SetPlaceObject(false)
+            //             this.StateSwith(ControllerState.MOVEMENT)
 
-                    }               
-                }
+            //         }               
+            //     }
 
-                if(key === 77){
+            //     if(key === 77){
 
-                }
+            //     }
 
-                if(key === 73){
-                    if(!this.PlayerController.ViewInventory()){
-                        this.PlayerController.SetViewInventory(true)
+        //         if(key === 73){
+        //             if(!this.PlayerController.ViewInventory()){
+        //                 this.PlayerController.SetViewInventory(true)
                         
-                        return;
-                    }
+        //                 return;
+        //             }
 
-                    this.PlayerController.SetViewInventory(false)
-                }
-                console.log(this.PlayerController.Position())
+        //             this.PlayerController.SetViewInventory(false)
+        //         }
+        //         //console.log(this.PlayerController.Position())
+        // }
         }
+    
 
         KeyUp(e : any){
-            console.log(e.keyCode)    
+            //console.log(e.keyCode)    
             this.PlayerController.SetPlayerAttack(false)
             this.PlayerController.SetShooting(false)
             //this.PlayerController.PushBuillet().SetPosition({x : this.PlayerController.Position().x, y :this.PlayerController.Position().y})

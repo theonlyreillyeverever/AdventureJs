@@ -1,4 +1,3 @@
-import { Dimensions } from "../Types/Dimensions";
 import { GameObjectType } from "../Types/GameObjectTypes";
 import { ItemFactory } from "../Types/ItemFactory";
 import { GameObjects } from "../Types/Objects";

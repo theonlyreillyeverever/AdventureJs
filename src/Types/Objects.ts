@@ -1,3 +1,5 @@
+import { Animate } from "../Assets/Animate";
+import { Bush } from "../Bush";
 import { Area } from "./Area";
 import { Dimensions } from "./Dimensions";
 import { GameObjectType } from "./GameObjectTypes";
@@ -64,6 +66,10 @@ export class GameObjects{
     UpdateState(state : OBJECTSTATE){
         this.objectState = state
 
+    }
+
+    Animate() : Animate | null{
+        return null
     }
 
 
@@ -144,6 +150,18 @@ export class GameObjects{
 
     Enemy() : any{}
 
-    Action(){}
+    Action(): any{}
     
+    DrawObject(context : any){
+        const {x, y} = this.Position()
+        const {width, height} = this.Dimensions()
+          
+                context.drawImage(this.img, x, y, width, height)
+            
+    }
+
+    CastToBush(i : GameObjects) : Bush{
+        return (i as Bush)
+    }
+
 }

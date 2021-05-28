@@ -7,12 +7,13 @@ import leaf from "./Assets/leaf-split.png"
 import { Seed } from "./Types/Items/Farming/Seed";
 import { Player } from "./Types/Player";
 import { PlantedSeed } from "./Types/Items/PlantedSeed";
+import { NullObject } from "./Types/Items/NullObject";
 
 
 
 export class Bush extends GameObjects{
     bushAnimation : BushAnimate
-    seed : Seed | undefined = new Seed({x : 0, y : 0}) 
+    seed : Seed | NullObject = new Seed({x : 0, y : 0}) 
 
     constructor(pos : Position){
         super(GameObjectType.BUSH, "Bush", "bss", pos, {width: 40, height : 40}, false, Bushpng, true, 1)
@@ -20,31 +21,34 @@ export class Bush extends GameObjects{
     }
 
 
-    TEST(context : any){
-        context.beginPath();
-        context.arc(this.Position().x, this.Position().y, 40, 0, 2 * Math.PI)
-        context.stroke()
-    }
-
     ToggleImgState(){
         if(this.DoAction()){
             this.SetImg(this.bushAnimation.Img().src)
             this.SetCollected(true)
         }
     }
+
+    Update(g : GameObjects){
+        g.SetImg(this.bushAnimation.Img().src)
+
+    }
+
     Animate(){
         return this.bushAnimation
     }
 
     Clear(){
-        this.seed = undefined
+        this.seed = new NullObject()
     }
 
     Process(ply : Player){
-        if(this.Collected() && this.seed !== undefined){
-            const Groth =  new PlantedSeed(this.seed);
+        if(this.Collected() && this.seed.Name() !== ""){
+            this.SetImg(this.bushAnimation.Img().src)
+            //this.SetCollected(true)
+            const Groth =  new PlantedSeed(new Seed({x : 440, y : 420}), {x : 440, y : 420});
             ply.Inventory().AddItem(Groth)
             this.Clear()
+            this.SetDoAction(false)
 
             return;
         }

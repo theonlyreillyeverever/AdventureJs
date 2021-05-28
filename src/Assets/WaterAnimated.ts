@@ -1,10 +1,12 @@
 import frameOne from "../Assets/water-sheet.png"
+import { Animate } from "./Animate";
 
-export class WaterAnimated {
+export class WaterAnimated extends Animate {
     img : any
     animationIndex : number
     
     constructor(){
+        super();
         this.img = new Image();
         this.SetImg(frameOne)
         this.animationIndex = 0;

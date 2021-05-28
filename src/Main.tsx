@@ -11,7 +11,6 @@ import { Seed } from "./Types/Items/Farming/Seed"
 import { GameObjetsAbstract } from "./Levels/WallObejctsAbstract"
 import { Weapon } from "./Types/Weapon"
 import NightMode from "./Assets/nightmode.png"
-import {Clock} from "./Game/Clock"
 import { Bullet } from "./Types/Bullet"
 import { DayNight } from "./Game/DayNight"
 import { GameObjects, OBJECTSTATE } from "./Types/Objects"
@@ -19,15 +18,17 @@ import {Observer} from "./Game/TriggedEvent"
 import { GameObjectType } from "./Types/GameObjectTypes"
 import { WeaponAdoptor } from "./Adoptor/WeaponAdoptor"
 import { House } from "./Types/House"
-import { Bush } from "./Bush"
+import { Bush, BushAnimate } from "./Bush"
 import { Car } from "./Cart"
-import { Item, itemState } from "./Types/Items/Item"
-import { NullItem } from "./Types/Items/NullItem"
-import { Fire } from "./Types/Items/Fire"
-import { Float } from "./Types/Items/Float"
+
 import { Bucket } from "./Types/Items/Tools/Bucket"
-import { Water } from "./Levels/Water"
+import { PlantedSeed } from "./Types/Items/PlantedSeed"
+import { Animate } from "./Assets/Animate"
+import { stringify } from "querystring"
+import { StringDecoder } from "string_decoder"
+import { CanvasDraw } from "./Game/Render"
 import { NullObject } from "./Types/Items/NullObject"
+
 const Main = () => {
 
     const au = require("./audio/game.mp3")
@@ -38,7 +39,7 @@ const Main = () => {
 
 
     const LevelsList = new BuildLevel()
-    const [player, setPlayer] = useState<Player>(new Player("Player", 100, {x : 100, y : 100}, {width : 50, height : 50}))
+    const [player, setPlayer] = useState<Player>(new Player("Player", 100, {x : 130, y : 100}, {width : 50, height : 50}))
 
     const WeaponLIST : Weapon[] = []
 
@@ -140,21 +141,26 @@ const Main = () => {
             single.WaterAnimated()?.Animate()[single.WaterAnimated()?.AnimationIndex()].sy,
             single.WaterAnimated()?.Animate()[single.WaterAnimated()?.AnimationIndex()].px,
             single.WaterAnimated()?.Animate()[single.WaterAnimated()?.AnimationIndex()].py
-            
             ,single.Position().x, single.Position().y, width, height)
+
+            //coll.Animation(single.WaterAnimated(), single, context)    
+
+
             single.Animate();
             context.restore()
-            if(player.Inventory().SearchByName("Bucket")){
+            const itemIndex = player.Inventory().SearchByName("Bucket")
+            if(itemIndex !== -1){
                 if( (player.Position().x+60 === single.Position().x) &&
                                 player.Position().y >= single.Position().y && player.Position().y <= single.Position().y+50
                 ){
-                    const b : Bucket = player.Inventory().GetInventory()[0] as Bucket
+                    const b : Bucket = player.Inventory().GetInventory()[itemIndex] as Bucket
                     if(!b.IsFilled()){
                         b.FillBucket(new WaterItem({x : 0, y : 0}));
+                        context.beginPath()
+                        context.rect(single.Position().x, single.Position().y, 50, 50);
+                        context.stroke()    
                     }
-                    context.beginPath()
-                    context.rect(single.Position().x, single.Position().y, 50, 50);
-                    context.stroke()                }
+               }
             }
            // DisplayMessage(((player.Position().x).toString() + " "+ (single.Position().x-50)), true, context)
         }
@@ -173,14 +179,43 @@ const Main = () => {
    }
 
 
+   let v = 360
+   const ShowHitLocation = (context : any, x : number) => {
+    if(player.PlayerAttack()){
+    context.beginPath()
+
+    context.save()
+    context.translate(player.Position().x+50, player.Position().y+5);
+    context.rotate(250 * Math.PI / 130)
+
+    context.rotate(x * Math.PI / (v-=x))
+    context.scale(1,1)
+
+    context.drawImage(player.CurrentWeapon().Img(), 0, 0 , 30, 30);
+
+    context.restore()
+
+    context.stroke();
+  //  console.log(x)
+    }
+    if(x >= 20){
+       player.SetPlayerAttack(false)
+       pizza = 0
+       v = 360
+       //alert("ru")
+    }
+
+
+}
+
    //Displays attack
    const Attack = (context : any) => {
         if(player.PlayerAttack()){
-               context.drawImage(player.CurrentWeapon().Img(), player.Position().x + 30, player.Position().y , 20, 20);
-    }
+            ShowHitLocation(context, pizza)
+            pizza=pizza+0.7        }
    }
 
-   let pizza = false
+   let pizza = 0.1
    const GameObjects = (context : any)  => {
        context.save()
       // context.transform(0, 0, 0, .5, 0.5, 0.5);
@@ -192,13 +227,8 @@ const Main = () => {
                 if(o.Type() === GameObjectType.SWITCH){
 
                     if(inRange){
-                        player.IsInRange(inRange)
-                        player.SetDoAction(o)
-                        
-                        o.Process(player)
-
+                        //coll.PerformAction(o, player, inRange)
                     }
-                    context.drawImage(o.Img(), o.Position().x, o.Position().y, o.Dimensions().width, o.Dimensions().height)
 
                 }
 
@@ -207,12 +237,12 @@ const Main = () => {
                 if(o.Type() === GameObjectType.TREE){
 
                     if(inRange && player.CurrentWeapon().Name() === "Axe"){
-                        player.IsInRange(inRange)
-                        player.SetDoAction(o)
-                        o.Process(player)
+                       // coll.PerformAction(o, player, inRange)
+                       player.IsInRange(inRange)
+                       player.SetDoAction(o)
+                       o.Process(player)
                     }
-                    context.drawImage(o.Img(), o.Position().x, o.Position().y, o.Dimensions().width, o.Dimensions().height)
-
+                    CanvasDraw.Draw(o, context)
                 }
                 if(o.Type() === GameObjectType.ENEMY){
                     if(o.Enemy().IsAlive()){
@@ -227,8 +257,10 @@ const Main = () => {
 
                     o.Enemy().AnimateEnemy()
                     o.Enemy().SetIsAttacking(inRange)
-                                      
-                    context.drawImage(o.Enemy().Img(), o.Enemy().Animate()[o.Enemy().AnimationIndex()].sx, o.Enemy().Animate()[o.Enemy().AnimationIndex()].sy, o.Enemy().Animate()[o.Enemy().AnimationIndex()].px, o.Enemy().Animate()[o.Enemy().AnimationIndex()].py ,o.Enemy().Position().x, o.Enemy().Position().y, o.Enemy().Dimensions().width, o.Enemy().Dimensions().height)
+                    CanvasDraw.Animation(o.Enemy().Animate(), o, context)
+
+
+                   // context.drawImage(o.Enemy().Img(), o.Enemy().Animate()[o.Enemy().AnimationIndex()].sx, o.Enemy().Animate()[o.Enemy().AnimationIndex()].sy, o.Enemy().Animate()[o.Enemy().AnimationIndex()].px, o.Enemy().Animate()[o.Enemy().AnimationIndex()].py ,o.Enemy().Position().x, o.Enemy().Position().y, o.Enemy().Dimensions().width, o.Enemy().Dimensions().height)
                     }
                     else{
                                     if(!o.Enemy().XP().XPFed()){
@@ -242,12 +274,6 @@ const Main = () => {
                 if(o.Type() === GameObjectType.HOUSE){
                     const houseCast : House = o as House
                     houseCast.DetectCollition(player)
-
-
-                    context.drawImage(o.Img(), o.Position().x, o.Position().y, o.Dimensions().width, o.Dimensions().height)
-                    if(player.Position().x >= o.Position().x+60 && player.Position().y >= o.Position().y){
-                       // DisplayMessage((o.Position().y + " " + player.Position().y), true, context)
-                    }
                     context.beginPath()
                     context.rect(houseCast.DoorwayRender().x, houseCast.DoorwayRender().y, houseCast.DoorwayRender().w, houseCast.DoorwayRender().h);
                     context.stroke()
@@ -257,6 +283,7 @@ const Main = () => {
                         LevelsList.UpdatePlayerState(gameLevels, player)
 
                     }
+                    //CanvasDraw.Draw(o, context);
 
                 }
 
@@ -264,34 +291,16 @@ const Main = () => {
                     const BushCast = o as Bush
                     if(inRange && player.CurrentWeapon().Name() !== ""){
                         //DisplayMessage((index + " " + subIndex).toString(), true, context)
-                        
                         player.IsInRange(inRange)
-                        console.log("pp : " + player.InRange())
                         player.SetDoAction(o)
                         o.Process(player)
-                        
-                        context.fillText((subIndex).toString(), o.Position().x, o.Position().y-10)
-                        // LevelsList.RemoveGameObject(gameLevels, index, new Bush({x : player.Position().x, y: player.Position().y }))
-                   
-                    }
 
-                    if(o.Collected()){
-                        BushCast.TEST(context)
 
-                        BushCast.Animate().AnimateStart(o.Collected())
-                        context.drawImage(o.Img(), 
-                        BushCast.Animate().Animate()[BushCast.Animate().AnimationIndex()].sx,
-                        BushCast.Animate().Animate()[BushCast.Animate().AnimationIndex()].sy,
-                        BushCast.Animate().Animate()[BushCast.Animate().AnimationIndex()].px,
-                        BushCast.Animate().Animate()[BushCast.Animate().AnimationIndex()].py,
-                        o.Position().x, o.Position().y, o.Dimensions().width, o.Dimensions().height)
-    
                     }
+                        CanvasDraw.Draw(o, context)
+                        CanvasDraw.Animation(BushCast.Animate() , o, context)    
 
-                    else{
-                        context.drawImage(o.Img(), 
-                        o.Position().x, o.Position().y, o.Dimensions().width, o.Dimensions().height)
-                    }
+                    
                 }
 
 
@@ -302,41 +311,24 @@ const Main = () => {
                 
               
                     if(inRange){
-                        context.beginPath()
-                        context.arc(o.Position().x+25, o.Position().y+25, 10, 0, 2 * Math.PI,)
-                        context.stroke()
+
                         player.CollectWeapon(cast)
                     }
 
                     if(!cast.Collected()){
-            
+                        CanvasDraw.Draw(o, context)
 
-                        context.drawImage(o.Img(), cast.Position().x, cast.Position().y, 30, 30)
+
+                        //context.drawImage(o.Img(), cast.Position().x, cast.Position().y, 30, 30)
                     }
                 }
 
 
                 else{
-
+                  //  pizza = 0
                     const xDistance = o.Position().x - player.Position().x
                     const yDistance = o.Position().y - player.Position().y
 
-
-
-
-                    if(inRange && !o.Collected()){
-
-                        context.beginPath()
-                        context.arc(o.Position().x+25, o.Position().y+25, (xDistance <= 0 ? 0 : xDistance), 0, 2 * Math.PI,)
-                        context.stroke()
-                    }
-                    //DisplayMessage(("x : " + xDistance + " y: " + yDistance), inRange, context)
-                    // if(!o.Collected()  && player.Position().x === o.Position().x && (player.Position().y >= o.Position().y && player.Position().y <= o.Position().y+o.Dimensions().height)){
-                    //     player.SetPosition({x : player.Position().x-10, y : player.Position().y})
-                    // }
-                    //  if(!o.Collected() && player.Position().x === o.Position().x+o.Dimensions().width && (player.Position().y >= o.Position().y && player.Position().y <= o.Position().y-o.Dimensions().height)){
-                    //     player.SetPosition({x : player.Position().x+10, y : player.Position().y})
-                    // }
                 }
 
 
@@ -348,38 +340,113 @@ const Main = () => {
         
    }
 
+   const coll = {
+
+    
+
+        PerformAction : (i : GameObjects, player : Player, inRange : boolean, BushCast : Animate, context : any) => {
+            
+            player.IsInRange(inRange)
+            player.SetDoAction(i)
+            i.Process(player)
+
+            if(i.Collected()){
+                alert("bro")
+                CanvasDraw.Animation(BushCast , i, context)    
+            }
+        },
+
+       Collect : (i : GameObjects, player: Player, inRange : boolean, context : any)=> {
+        switch(i.Type()){
+            case GameObjectType.PLANT :{
+                if(!(i as PlantedSeed).Grown() && player.DoAction()?.DoAction()){
+                    (player.Inventory().GetInventory()[player.Inventory().SearchByName("Bucket")] as Bucket)
+                     .UseBucketContents(i.PlantState() as Seed)
+                    player.DoAction()?.SetDoAction(false)    
+                    return;
+                }
+                break;  
+            }
+            case GameObjectType.BUSH :{
+                    const cast : PlantedSeed  = (i as PlantedSeed)
+                    const BushCast : Bush =  (cast.PlantState() as Bush)
+                    if(inRange && player.CurrentWeapon().Name() !== "" && player.DoAction()?.DoAction()){
+                        //DisplayMessage((index + " " + subIndex).toString(), true, context)
+                        player.IsInRange(inRange)
+                        player.SetDoAction(BushCast)
+                        BushCast.Process(player)
+                    }
+                        // if(!BushCast.Collected()){
+                        //     CanvasDraw.Draw(i, context)
+
+
+                        // }
+                        CanvasDraw.Animation(BushCast.Animate(), i, context)    
+
+
+                    
+                        break;  
+
+                }
+
+                    //coll.PerformAction(i, player, inRange, cast.Animate(), context )
+            
+            
+            default : {
+
+               // console.log("nigga faggit ", i.Type())
+            }
+        }
+
+        i.DrawObject(context)
+       },
+
+
+   }
+
+   const CheckIfCollected = (o : GameObjects, index : number) => {
+       if(o.Collected()){
+        LevelsList.RemovePlacedItem(index ,gameLevels)
+       }
+   }
+
    
 
    const RenderPlacedItems = (context : any) => {
+       //console.log( LevelsList.PlacedItems(gameLevels))
         LevelsList.PlacedItems(gameLevels).forEach((i : GameObjects, index : number) => {
-            const inRange : boolean = i.Area(player, 50)
+            const inRange : boolean = i.Area(player, 0)
             player.IsInRangeItem(inRange, new NullObject())
 
             if(inRange){
-                player.IsInRangeItem(inRange, i)
-       
-            
-               DisplayMessage(i.Options(), inRange, context)
-                const tmp = (i as unknown) as GameObjects
-                player.SetDoAction(i)
-                if(player.DoAction()?.DoAction()){
-                    alert("pizza rbo")
-                    //const fff = new Fire(i, {x : i.Position().x, y : i.Position().y})
-                    // const bb : Bucket = player.Inventory().GetInventory()[0] as Bucket
-                    // const e : Seed = i as Seed
-                    // bb.UseBucketContents(e);
-                    // if(e.HasWater()){
-                    //     DisplayMessage("growing", true, context)
-                    // }
-                    //LevelsList.replace(index, gameLevels)
-
-                   // LevelsList.PlacedItems(gameLevels).push(fff)
-                    player.DoAction()?.SetDoAction(false)
-                }
+                player.IsInRangeItem(inRange, i)            
+                //CanvasDraw.DrawRect(i, context)
+                //CanvasDraw.TextAboveObject((inRange ? "true" : "false"), i, context)
             }
-            context.beginPath()
-            context.drawImage(i.Img(),i.Position().x, i.Position().y, i.Dimensions().width, i.Dimensions().height)
-            context.stroke()
+                if(i.Type() === GameObjectType.PLANT){
+                    if(!(i as PlantedSeed).Grown() && player.DoAction()?.DoAction()){
+                        (player.Inventory().GetInventory()[player.Inventory().SearchByName("Bucket")] as Bucket)
+                         .UseBucketContents(i.PlantState() as Seed)
+                        player.DoAction()?.SetDoAction(false)    
+                    }
+                    i.DrawObject(context)
+                }
+
+                if(i.Type() === GameObjectType.BUSH ){
+                    const BushCast = (i as PlantedSeed).PlantState();
+                    if(inRange && player.CurrentWeapon().Name() !== "" && player.DoAction()?.DoAction()){
+                        //DisplayMessage((index + " " + subIndex).toString(), true, context)
+                        player.IsInRange(inRange)
+                        player.SetDoAction(BushCast)
+                        BushCast.Process(player)
+                    }
+                    if(!BushCast.Collected()){
+                            BushCast.DrawObject(context)
+                    }
+                    CanvasDraw.Animation((BushCast as Bush).Animate()  , BushCast, context)    
+                    CheckIfCollected(BushCast, index)
+                        
+                }  
         })
    }
 
@@ -574,7 +641,7 @@ const Main = () => {
             context.beginPath()
             context.fillStyle = "red"
             context.rect(player.PlaceObject().Pos().x, player.PlaceObject().Pos().y, player.Dimensions().width, player.Dimensions().height)
-            context.drawImage(player.PlaceObject().Item().PlantState().Img(), player.PlaceObject().Pos().x, player.PlaceObject().Pos().y, player.Dimensions().width, player.Dimensions().height)
+           context.drawImage(player.PlaceObject().Item().Img(), player.PlaceObject().Pos().x, player.PlaceObject().Pos().y, player.Dimensions().width, player.Dimensions().height)
             context.stroke();
         }
 
@@ -583,6 +650,7 @@ const Main = () => {
                 player.PlaceObject().Item().SetPosition({ x : player.PlaceObject().Pos().x, y : player.PlaceObject().Pos().y})
                 LevelsList.PlaceItemInLevel(player.PlaceObject().Item(), gameLevels);
                 player.PlaceObject().SetSelectedItem(new NullObject());
+ 
             }
 
         }
@@ -737,7 +805,7 @@ const Main = () => {
         context.save();
        // context.rect(player.Position().x, player.Position().y, player.Dimensions().width, player.Dimensions().height)
       // context.transform(1, .5, .5, 0, 0, 0);
-
+        context.fillText((player.Position().x +  " " + player.Position().y), player.Position().x, player.Position().y-10)
         context.stroke()
         context.drawImage(player.ImageState(), 
         player.GhoustIconProptery().Animate()[player.GhoustIconProptery().AnimationIndex()].sx, 
