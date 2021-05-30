@@ -17,7 +17,6 @@ export enum OBJECTSTATE{
 
 
 export class GameObjects{
-   
 
     type : GameObjectType
     name: string;

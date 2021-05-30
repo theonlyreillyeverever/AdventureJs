@@ -237,13 +237,14 @@ const Main = () => {
                 if(o.Type() === GameObjectType.TREE){
 
                     if(inRange && player.CurrentWeapon().Name() === "Axe"){
-                       // coll.PerformAction(o, player, inRange)
                        player.IsInRange(inRange)
                        player.SetDoAction(o)
                        o.Process(player)
                     }
                     CanvasDraw.Draw(o, context)
                 }
+
+                
                 if(o.Type() === GameObjectType.ENEMY){
                     if(o.Enemy().IsAlive()){
                         const inRange = o.Area(player, 200);
